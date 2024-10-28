@@ -95,7 +95,7 @@ allprojects {
     }
 
     if (project.name != 'integration-tests' && project.name != 'web3j') {
-        apply from: "$rootDir/gradle/publish/build.gradle"
+        apply from: "$rootDir/gradle/tangem-publish/build.gradle"
     }
 }
 configure(subprojects.findAll { it.name != 'integration-tests' }) {
