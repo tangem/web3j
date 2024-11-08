@@ -440,6 +440,23 @@ public class TypeDecoder {
         }
     }
 
+    private static int countStaticStructFields(final Class<?> type) {
+        try {
+            if (StaticStruct.class.isAssignableFrom(type)) {
+                return Arrays.stream(type.getConstructors()[0].getParameters())
+                        .map((tr) -> countStaticStructFields(tr.getType()))
+                        .reduce(0, (a, b) -> a + b);
+            }
+
+            return 1;
+        } catch (Exception e) {
+            throw new UnsupportedOperationException(
+                    "countStaticStructFields failed for " + Utils.getTypeName(type),
+                    e);
+        }
+    }
+
+
     @SuppressWarnings("unchecked")
     private static <T extends Type> T decodeStaticStructElement(
             final String input,
@@ -457,14 +474,13 @@ public class TypeDecoder {
                 final Class<T> declaredField = (Class<T>) constructor.getParameterTypes()[i];
 
                 if (StaticStruct.class.isAssignableFrom(declaredField)) {
-                    final int nestedStructLength =
-                            classType
-                                            .getDeclaredFields()[i]
-                                            .getType()
-                                            .getConstructors()[0]
-                                            .getParameters()
-                                            .length
-                                    * 64;
+                    final Class<?> t=classType
+                            .getDeclaredFields()[i]
+                            .getType();
+                    final int fieldsCount=countStaticStructFields(t);
+//                    System.out.println("Struct "+t.getTypeName()+" -> fieldsCount="+fieldsCount);
+                    final int nestedStructLength = 64 * fieldsCount;
+//                    System.out.println("Decode "+declaredField.getTypeName()+", currOffset="+currOffset+", nestedStructLength="+nestedStructLength);
                     value =
                             decodeStaticStruct(
                                     input.substring(currOffset, currOffset + nestedStructLength),
