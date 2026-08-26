@@ -69,4 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Javadoc release
-        run: ./gradlew -Dorg.ajoberstar.grgit.auth.username=${{ secrets.GITHUB_TOKEN }} core:gitPublishPush
+        env:
+          GRADLE_OPTS: "-Dorg.ajoberstar.grgit.auth.username=${{ secrets.GITHUB_TOKEN }}"
+        run: ./gradlew core:gitPublishPush
